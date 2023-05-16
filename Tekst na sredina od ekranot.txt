@@ -1,0 +1,34 @@
+JMP main
+s:
+DB "Dobra nokj"
+DB 0
+
+main:
+    MOV A, 1 ;  
+    OUT 7    ; ovie dve naredbi za tockovni nacin vklucvanje deka registerot VIDMODE e so indeks 7
+    MOV A, 0xA300 ; adresa za menvanje na bground color
+    OUT 8 ; na VIDADDR znaci
+    MOV A, 0x0003; r-red, g-green, b-blue rrrg|ggbb 0000|0011 = 0x0003 sina boja
+    OUT 9
+    MOV C, s
+    MOV D, 0x0706 ;nov red pocnuva na kako na pr. 0x0100, 0x0200, 0x0300, ... 131 e max char so se gleda itn...(max do 0x**18 akoe string)
+    
+loop:
+	MOV A, D
+    OUT 8
+    IN 10
+    MOVB AH, [C]
+    CMPB AH, 0
+    JE srce
+    MOVB AL, 0xE0
+    OUT 9
+    INC C
+    ADD D, 2
+    JMP loop
+srce:
+	MOV A, 0x0910
+    OUT 8
+    MOVB AL, 0xE0
+    MOVB AH, 0x0003
+    OUT 9
+	HLT

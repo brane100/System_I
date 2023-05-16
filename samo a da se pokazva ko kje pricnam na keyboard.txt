@@ -1,0 +1,30 @@
+JMP main
+JMP isr
+
+isr:
+	PUSH A ; The ISR will use register A.
+	IN 5 ; Get the keyboard status .
+	AND A, 1 ; Mask out the keypress event .
+	CMP A, 1 ; Is it the keypress event ?
+	JE printkey ; If yes , print out the key code .
+	IN 6 ; Get the key code to clear the keyboard status .
+	MOVB [0x1000], 0 ; Clear the display .
+	JMP keysdone
+printkey:
+	IN 6 ; Get the key code .
+    CMP A, 'a' ; that's the letter 'a'    
+    JNE keysdone
+	MOVB [0x1000], AL ; Print out the letter 'a' .
+keysdone:
+	MOV A, 1 ; Keyboard interrupt mask .
+	OUT 2 ; Keyboard has been serviced .
+iret:
+	POP A ; Restore the register A.
+	IRET ; Return from ISR .
+
+main:
+	MOV SP, 0x0FFF ; Initialize the stack pointer .
+	MOV A, 1 ; Keyboard interrupt mask .
+	OUT 0 ; Set the mask .
+	STI ; Enable interrupts .
+	HLT ; Do nothing .

@@ -1,0 +1,79 @@
+# let generate_matrix rows columns vals seed = Random .
+init seed ; Array . make_matrix rows columns 0 | >
+Array . map ( Array . map (fun x - > Random . int vals ) ) ;;
+val generate_matrix : int -> int -> int -> int -> int
+array array = <fun >
+# let colormatrix = generate_matrix 4 6 5 0 ;;
+val colormatrix : int array array =
+  [|[|2; 0; 4; 1; 2; 3|]; [|3; 2; 4; 2; 3; 3|]; [|3;
+  0; 4; 3; 3; 0|];[|1; 3; 2; 0; 2; 1|]|]
+# print_int_matrix colormatrix ;;
+204123
+324233
+304330
+ 132021
+ - : unit = ()
+ # flood colormatrix 3 ;;
+ - : unit = ()
+ # print_int_matrix colormatrix ;;
+ 304123
+ 324233
+ 304330
+ 132021
+ - : unit = ()
+ # flood colormatrix 2 ;;
+ - : unit = ()
+ # print_int_matrix colormatrix ;;
+ 204123
+ 224233
+ 204330
+ 132021
+ - : unit = ()
+ # flood colormatrix 4 ;;
+ - : unit = ()
+ # print_int_matrix colormatrix ;;
+ 404123
+ 444233
+ 404330
+ 132021
+ - : unit = ()
+ # flood colormatrix 3 ;;
+ - : unit = ()
+ # print_int_matrix colormatrix ;;
+ 303123
+ 333233
+ 303330
+ 132021
+ - : unit = ()
+ # let colormatrix2
+      =[|[|2;0;3;3;3;3;3|];[|3;1;3;5;4;4;3|];[|3;2;3;3;3;2;0|];[|3;4;4;6;3;1;0|];[|3;3;3;3;3;0;2|]|]
+      ;;
+ val colormatrix2 : int array array =
+ [|[|2; 0; 3; 3; 3; 3; 3|]; [|3; 1; 3; 5; 4; 4; 3|];
+ [|3; 2; 3; 3; 3; 2; 0|]; [|3; 4; 4; 6; 3; 1; 0|];
+ [|3; 3; 3; 3; 3; 0; 2|]|]
+ # print_int_matrix colormatrix2 ;;
+ 2033333
+ 3135443
+ 3233320
+ 3446310
+ 3333302
+ - : unit = ()
+ # flood colormatrix2 3 ;;
+ - : unit = ()
+ # print_int_matrix colormatrix2 ;;
+ 3033333
+ 3135443
+ 3233320
+ 3446310
+ 3333302
+ - : unit = ()
+ # flood colormatrix2 4 ;;
+ - : unit = ()
+ # print_int_matrix colormatrix2 ;;
+ 4044444
+ 4145444
+ 4244420
+ 4446410
+ 4444402
+ - : unit = ()

@@ -1,0 +1,49 @@
+; PERRY THE PLATYPUS zamena za A
+; da se oboi uste
+
+JMP main
+str:
+DB "ABBA\x00 "
+tile_perry:
+DB "\x01\xE0\x03\xF0\x0F\xFC\x07\xF8\x03\xF0\x03\xF0\x03\xFC\x03\xF8"
+DB "\x7B\xF0\x3F\xF8\x1F\xFC\xFF\xF4\x07\xF0\x07\xF0\x06\x30\x0E\x38"
+ main:
+ ; Initialize the graphics mode .
+ MOV A, 1 ; Enable the text mode
+ OUT 7 ; through I/O register VIDMODE .
+
+ ; Print the string .
+ MOV C, str ; Pointer to string .
+ MOV D, 0 ; Pointer to text cell .
+ str_loop:
+ MOV A, D ; Activate the current text cell
+ OUT 8 ; through I/O register VIDADDR .
+ MOVB AH , [C] ; Get the current character .
+ CMPB AH , 0 ; If at the end of the string ,
+ JE str_break ; break the loop .
+ MOVB AL , 227 ; Set the magenta color .
+ OUT 9 ; Print the character .
+ INC C ; Next character .
+ ADD D, 2 ; Next text cell .
+ JMP str_loop
+ str_break:
+
+ ; Redefine letter ’A ’.
+ MOV C, tile_perry ; Pointer to ghost definition data .
+
+
+ MOV D, 0x8820 ; Pointer to VRAM address for character ’A ’.
+ MOV B, 16 ; The size of definition data in words (16 - bit ).
+ tile_set_loop:
+ CMP B, 0 ; If all data copied ,
+ JE tile_set_break ; break the loop .
+ MOV A, D ; Activate the VRAM address
+ OUT 8 ; through I/O register VIDADDR .
+ MOV A, [C] ; Get the current word (16 - bit )
+ OUT 9 ; copy it to VRAM .
+ DEC B ; Decrease word counter .
+ ADD C, 2 ; Next word in RAM .
+ ADD D, 2 ; Next VRAM address .
+ JMP tile_set_loop
+ tile_set_break:
+ HLT

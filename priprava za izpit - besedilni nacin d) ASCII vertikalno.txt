@@ -1,0 +1,23 @@
+MOV A, 1
+OUT 7
+MOVB CL, 0
+MOV D, 0
+loop:
+	MOV A, D
+    OUT 8
+    IN 10 ;generiranje random boja
+    MOVB AH, CL
+    ;MOVB AL, 255 ; bela boja
+    OUT 9
+    INCB CL
+    CMPB CL, 0
+    JE break
+    ADD D, 256
+    MOV B, D
+    AND B, 0xF000
+    CMP B, 0x1000
+    JB loop
+    SUB D, 0x0FFE
+    JMP loop
+break:
+	HLT	

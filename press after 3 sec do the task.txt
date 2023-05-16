@@ -1,0 +1,88 @@
+JMP main
+JMP isr
+
+quit: DW 0
+
+isr:
+	PUSH A ; The ISR will use register A.
+	IN 5 ; Get the keyboard status .
+	AND A, 1 ; Mask out the keypress event .
+	CMP A, 1 ; Is it the keypress event ?
+	JE bukva ; If yes , print out the key code .
+	IN 6 ; Get the key code to clear the keyboard status .
+	MOVB [0x1000], 0 ; Clear the display.
+	JMP toe
+isr1:
+	PUSH A ; The ISR will use register A.
+	MOVB AL , BL ; Get the currently displayed character .
+	INCB AL ; Increase its ASCII value .
+	MOVB BL , AL ; Print out the new value .
+	CMPB AL, 3 ; Check if ’3’ has been reached .
+	JNE timerdone ; If not , we are done .
+	MOV [quit] , 1 ; Otherwise set quit to true .
+timerdone:
+	MOV A, 2 ; Timer interrupt mask .
+	OUT 2 ; Timer has been serviced .
+	POP A ; Restore the register A.
+	JMP aktiviraj
+bukva:
+	IN 6 ; Get the key code .
+    CMP A, 0x0020 ; dali e manato space?
+    JNE toe
+    MOVB [0x1000], 0x0062 ; Print out the letter 'b' .
+    JMP sat
+toe:
+	MOV A, 1 ; Keyboard interrupt mask .
+	OUT 2 ; Keyboard has been serviced .
+iret:
+	POP A ; Restore the register A.
+	IRET ; Return from ISR .
+    
+sat:
+	MOVB CL, 0 ; brojac
+	MOV A, 5000
+    OUT 3
+    MOV A, 2
+    OUT 0
+    
+povt:
+MOV A, [quit] ; Read the global quit variable .
+CMP A, 1 ; Check it ’s value .
+JE aktiviraj ; If true , break the loop .
+JMP povt ; Otherwise , read the value again .
+
+ 
+ aktiviraj:
+ MOV A, 1 ; Set up the text mode
+ OUT 7 ; through register VIDMODE .
+ MOVB CL, 'A' ; Start with the letter ’A ’.
+ MOV D, 0 ; Pointer to the screen cells .
+ 
+ loop:
+ CMPB CL, 'Z' ; Are we past the letter ’Z ’?
+ JA toe ; If yes , finish .
+ CMPB DH, 16 ; Have we already filled up the first 15 lines ?
+ JB noscroll ; If not , no need to scroll .
+ MOV A, 0xA304 ; Get the vertical scroll information
+ OUT 8 ; from VRAM
+ IN 9 ; to register A.
+ ADD A, 16 ; Increase it by 16 pixels
+ OUT 9 ; and write it back to VRAM .
+ 
+ noscroll:
+ MOV A, D ; Activate the current screen cell
+ OUT 8 ; in VRAM .
+ MOVB AH, CL ; Set up the current ASCII code .
+ MOVB AL, 255 ; Make it white .
+ OUT 9 ; Display the character .
+ INC C ; Next character
+ ADD D, 256 ; Next line .
+ JMP loop
+ 
+ main:
+ 	MOV SP, 0x0FFF
+ 	MOV A, 1 ; keyboard interrupt mask
+ 	OUT 0 ; set the mask
+ 	STI
+ break:
+ 	HLT

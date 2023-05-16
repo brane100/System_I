@@ -1,0 +1,23 @@
+MOV A, 1
+OUT 7
+MOVB CL, 0
+MOV D, 0
+loop:
+    MOV A, D
+    OUT 8
+    IN 10
+    MOVB AH, CL
+    ;MOVB AL, 255
+    OUT 9
+    INCB CL
+    CMPB CL, 0
+    JE break
+    ADD D, 2
+    MOV B, D
+    AND B, 0x00FF
+    CMP B, 32
+    JB loop
+    ADD D, 224
+    JMP loop
+break:
+    HLT

@@ -1,0 +1,45 @@
+JMP main
+s:
+DB "Hello world!"
+DB 0
+
+color:
+    DB 0x00E0
+    DB 58
+    DB 74
+    DB 250
+    DB 21
+    DB 5
+    DB 149
+    DB 99
+    DB 150
+    DB 94
+    DB 165
+    DB 47
+
+main:
+    MOV A, 1
+    OUT 7
+    MOV B, color
+    MOV C, s
+    MOV D, 0x0704
+    
+loop:
+	MOV A, D
+    OUT 8
+    MOVB AH, [C]
+    CMPB AH, 0
+    JE srce
+    MOVB AL, [B]
+    OUT 9
+    INC B
+    INC C
+    ADD D, 2
+    JMP loop
+srce:
+	MOV A, 0x0910
+    OUT 8
+    MOVB AL, 0xE0
+    MOVB AH, 0x0003
+    OUT 9
+	HLT

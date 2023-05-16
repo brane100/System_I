@@ -1,0 +1,74 @@
+JMP main
+JMP isr
+; The vertical sync signal .
+vsync: DW 0
+; The ISR to serve the graphics card interrupt requests .
+isr:
+PUSH A ; ISR will use register A.
+ MOV [vsync] , 1 ; Set the vsync flag .
+ MOV A, 4 ; Clear the graphics card interrupt request
+ OUT 2 ; through the I/O register IRQEOI .
+ POP A ; Restore the original value of register A.
+ IRET ; Return from interrupt .
+
+ ; Function wait_frames ( count ) waits for count frames .
+ ; Parameter count is given through register C.
+ wait_frames:
+ wait_frames_loop:
+ MOV A, [vsync] ; Check the current vsync value .
+ CMP A, 0 ; If still 0 ,
+ JE wait_frames_loop ; check it again .
+ MOV [vsync] , 0 ; The vsync signal received . Reset it.
+ DEC C ; Count the received frame .
+ CMP C, 0 ; When enough frames passed ,
+ JE wait_frames_return ; return from the function .
+ JMP wait_frames_loop ; Otherwise , wait another frame .
+ wait_frames_return:
+
+;Grafika Sistemi 1, 2021-2022
+ RET
+
+ main:
+ MOV SP , 0x0FFF ; Initialize the stack pointer .
+
+ ; Set up the graphics screen .
+ MOV A, 1 ; Set the graphics card to TEXT mode
+ OUT 7 ; through register VIDMODE .
+
+ ; Initialize the object position .
+ MOV D, 0x0F0E ; Initial cell is (7 , 0) ODDOLU!!!!!!!!. 
+ MOV A, D ; Activate the cell
+ OUT 8 ; through VIDADDR .
+ MOVB AH , 255 ; The right shape .
+ MOVB AL , 15 ; White color .
+ OUT 9 ; Print the character .
+
+ ; Enable graphics card interrupts .
+ MOV A, 4 ; Mask the graphics card interrupts .
+ OUT 0 ; Enable the graphics card interrupts .
+ STI ; Enable interrupts globally .
+
+ ; Wait for 2 seconds before the animation starts .
+ MOV C, 100
+ CALL wait_frames ; Call wait_frames (100) .
+
+ ; Enter the animation loop .
+ loop:
+ MOV A, D ; The current object position .
+ OUT 8 ; Activate the cell .
+ MOV A, 0 ; Overwrite the cell with 0
+ OUT 9 ; to erase the object .
+ SUB D, 256 ; Move one line GORE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ CMPB DH , 16 ; Is the object in the 16 - th line ?
+ JB noreset ; If not , do not reset its position .
+ MOV D, 0x0F0E ; Otherwise put it back to cell (7 , 0) DOLUUU!!!!!.
+ noreset:
+ MOV A, D ; The new object position .
+ OUT 8 ; Activate the cell .
+ MOVB AH , 255 ; The ring shape .
+ MOVB AL , 15 ; White color .
+ OUT 9 ; Print the character .
+ MOV C, 25 ; Wait for 25 frames .
+ CALL wait_frames ; Call wait_frames (25) .
+ JMP loop ; Repeat for the next frame .
+ HLT

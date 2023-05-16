@@ -1,0 +1,42 @@
+??
+
+JMP main
+x:
+DW 0x01234
+DW 0x02222
+DW 0x07541
+DW 0x07542
+DW 0x7543
+DW 0x7544
+DW 0x7545
+DW 0x7546
+DW 0x7547
+DW 0x7548
+DW 0x7549
+DW 0x754A
+
+main:
+
+MOV A, 2
+OUT 7
+MOV A, 3
+OUT 7
+
+
+
+l:
+CMP C, broj
+JAE end
+MOV D, x
+MOV A, C
+MUL 2
+ADD D, A
+MOV A, [D]
+OUT 8
+MOV A, 0x0075
+OUT 9
+INC C
+JMP l
+
+end:
+HLT
